@@ -1,13 +1,7 @@
 use crate::constants::*;
 use crate::helpers::draw_rounded_rect;
+use crate::structures::{Cell, Game, ValidMove};
 use macroquad::prelude::*;
-
-pub struct Game {
-    pub board: [[Cell; 8]; 8],
-    pub turn: bool,
-    pub hovering_over: (usize, usize),
-    pub valid_moves: Vec<ValidMove>,
-}
 impl Game {
     pub fn new() -> Self {
         let mut new_game = Self {
@@ -15,6 +9,7 @@ impl Game {
             turn: false,
             hovering_over: (0, 0),
             valid_moves: vec![],
+            count: (0, 0),
         };
         new_game.clear();
         new_game
@@ -26,6 +21,7 @@ impl Game {
         self.board[3][4] = Cell::White;
         self.board[4][3] = Cell::White;
         self.calculate_moves();
+        self.update_count();
     }
     pub fn show(&self) {
         for i in 0..64 {
@@ -98,12 +94,26 @@ impl Game {
                     Cell::Empty => panic!("Tried flipping empty cell. Should never happen"),
                 }
             }
+            self.update_count();
             self.calculate_moves();
         } else {
             eprintln!("othello: ({x}, {y}):Invalid Move!");
         }
     }
 
+    fn update_count(&mut self) {
+        self.count = (0, 0);
+        for i in 1..64 {
+            let x = i % 8;
+            let y = i / 8;
+
+            match self.board[x][y] {
+                Cell::Black => self.count.0 += 1,
+                Cell::White => self.count.1 += 1,
+                _ => (),
+            }
+        }
+    }
     pub fn calculate_moves(&mut self) {
         self.valid_moves.clear();
 
@@ -164,62 +174,4 @@ impl Game {
             }
         }
     }
-}
-
-pub struct UI {
-    font: Font,
-}
-
-impl UI {
-    pub fn new(font: Font) -> Self {
-        Self { font }
-    }
-    fn button(&self, rect: Rect, label: &str) -> bool {
-        let (mx, my) = mouse_position();
-        let hovered = rect.contains(vec2(mx, my));
-        let color = if hovered { COLOR_BK } else { DARKGRAY };
-
-        draw_rounded_rect(rect.x, rect.y, rect.w, rect.h, 5.0, color);
-
-        let font_size = 24;
-        let dims = measure_text(label, Some(&self.font), font_size, 1.0);
-
-        let text_x = rect.x + (rect.w - dims.width) / 2.0;
-        let text_y = rect.y + (rect.h + dims.height) / 2.0;
-
-        draw_text_ex(
-            label,
-            text_x,
-            text_y,
-            TextParams {
-                font: Some(&self.font),
-                font_size,
-                color: WHITE,
-                ..Default::default()
-            },
-        );
-
-        hovered && is_mouse_button_pressed(MouseButton::Left)
-    }
-    pub fn show(&self, game: &Game) {
-        if self.button(Rect::new(865.0, 25.0, 312.5, 47.5), "Reset") {
-            println!("Button clicked!");
-        }
-        if self.button(Rect::new(865.0, 77.5, 312.5, 47.5), "Leave") {
-            println!("Button clicked!");
-        }
-    }
-}
-
-#[derive(PartialEq, Clone, Debug)]
-pub struct ValidMove {
-    pub pos: (usize, usize),
-    pub pos_to_flip: Vec<(usize, usize)>,
-}
-
-#[derive(Clone, Copy, PartialEq)]
-pub enum Cell {
-    Black,
-    White,
-    Empty,
 }
