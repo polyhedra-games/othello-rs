@@ -11,3 +11,5 @@ The game Othello implemented in Rust using macroquad.
 - [x] Ui.
 - [ ] Win condition checking and menu screens.
 
+## Images
+[Demo](./screenshots/demo.png)
