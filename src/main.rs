@@ -17,24 +17,13 @@ async fn main() {
 
     loop {
         clear_background(COLOR_BG);
-        game.show();
-        ui.show(&mut game);
-
-        let (mx, my) = mouse_position();
-
-        let bx = ((mx - CELL_SIZE * 0.25) / (CELL_SIZE * 1.05)) as isize;
-        let by = ((my - CELL_SIZE * 0.25) / (CELL_SIZE * 1.05)) as isize;
-
-        if (0..8).contains(&bx) && (0..8).contains(&by) {
-            game.hovering_over = (bx as usize, by as usize);
-        } else {
-            game.hovering_over = (9, 9);
-        }
-
-        if is_mouse_button_pressed(MouseButton::Left) {
-            if game.hovering_over != (9, 9) {
-                game.play();
+        match game.state {
+            State::Playing => {
+                game.show();
+                game.mouse_handling();
+                ui.show_game_ui(&mut game);
             }
+            State::Win(c) => ui.show_win_ui(&mut game),
         }
 
         next_frame().await;

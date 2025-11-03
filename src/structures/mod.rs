@@ -9,6 +9,11 @@ pub struct LabelOptions {
     bg_color: Color,
 }
 
+pub enum State {
+    Playing,
+    Win(Cell),
+}
+
 pub struct UI {
     font: Font,
 }
@@ -19,6 +24,8 @@ pub struct Game {
     pub hovering_over: (usize, usize),
     pub valid_moves: Vec<ValidMove>,
     pub count: (u8, u8),
+    pub skipped: bool,
+    pub state: State,
 }
 #[derive(PartialEq, Clone, Debug)]
 pub struct ValidMove {
@@ -26,7 +33,7 @@ pub struct ValidMove {
     pub pos_to_flip: Vec<(usize, usize)>,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Cell {
     Black,
     White,

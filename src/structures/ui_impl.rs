@@ -54,7 +54,18 @@ impl UI {
             },
         );
     }
-    pub fn show(&self, game: &mut Game) {
+    pub fn show_win_ui(&self, game: &mut Game) {
+        self.label(
+            Rect::new(865.0, 130.0, 312.5, 310.0),
+            format!("{:?} Won!", game.get_winner()).as_str(),
+            LabelOptions {
+                font_size: 160,
+                font_color: COLOR_WT,
+                bg_color: COLOR_BK,
+            },
+        );
+    }
+    pub fn show_game_ui(&self, game: &mut Game) {
         if self.button(Rect::new(865.0, 25.0, 312.5, 47.5), "Reset") {
             game.clear();
         }

@@ -1,6 +1,6 @@
 use crate::constants::*;
 use crate::helpers::draw_rounded_rect;
-use crate::structures::{Cell, Game, ValidMove};
+use crate::structures::{Cell, Game, State, ValidMove};
 use macroquad::prelude::*;
 impl Game {
     pub fn new() -> Self {
@@ -10,6 +10,8 @@ impl Game {
             hovering_over: (0, 0),
             valid_moves: vec![],
             count: (0, 0),
+            skipped: false,
+            state: State::Playing,
         };
         new_game.clear();
         new_game
@@ -20,8 +22,55 @@ impl Game {
         self.board[4][4] = Cell::Black;
         self.board[3][4] = Cell::White;
         self.board[4][3] = Cell::White;
+        self.turn = false;
+        self.skipped = false;
         self.calculate_moves();
         self.update_count();
+    }
+    pub fn get_winner(&self) -> Cell {
+        if self.count.0 > self.count.1 {
+            Cell::Black
+        } else {
+            Cell::White
+        }
+    }
+    fn check_win(&mut self) {
+        if !self
+            .board
+            .iter()
+            .flatten()
+            .any(|cell| matches!(cell, Cell::Empty))
+        {
+            self.state = State::Win(self.get_winner());
+        } else if self.valid_moves.is_empty() {
+            if self.skipped {
+                self.state = State::Win(self.get_winner());
+            } else {
+                self.skipped = true;
+                self.turn = !self.turn;
+                self.calculate_moves();
+                println!("Skipped turn");
+                self.check_win();
+            }
+        }
+    }
+    pub fn mouse_handling(&mut self) {
+        let (mx, my) = mouse_position();
+
+        let bx = ((mx - CELL_SIZE * 0.25) / (CELL_SIZE * 1.05)) as isize;
+        let by = ((my - CELL_SIZE * 0.25) / (CELL_SIZE * 1.05)) as isize;
+
+        if (0..8).contains(&bx) && (0..8).contains(&by) {
+            self.hovering_over = (bx as usize, by as usize);
+        } else {
+            self.hovering_over = (9, 9);
+        }
+
+        if is_mouse_button_pressed(MouseButton::Left) {
+            if self.hovering_over != (9, 9) {
+                self.play();
+            }
+        }
     }
     pub fn show(&self) {
         for i in 0..64 {
@@ -85,8 +134,7 @@ impl Game {
         }
 
         if valid_move.is_some() {
-            self.turn = !self.turn;
-            self.board[x][y] = if self.turn { Cell::Black } else { Cell::White };
+            self.board[x][y] = if self.turn { Cell::White } else { Cell::Black };
             for (i, j) in valid_move.unwrap().pos_to_flip {
                 match self.board[i][j] {
                     Cell::Black => self.board[i][j] = Cell::White,
@@ -95,15 +143,18 @@ impl Game {
                 }
             }
             self.update_count();
+            self.turn = !self.turn;
+            self.skipped = false;
             self.calculate_moves();
         } else {
             eprintln!("othello: ({x}, {y}):Invalid Move!");
         }
+        self.check_win();
     }
 
     fn update_count(&mut self) {
         self.count = (0, 0);
-        for i in 1..64 {
+        for i in 0..64 {
             let x = i % 8;
             let y = i / 8;
 

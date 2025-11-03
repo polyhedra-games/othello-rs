@@ -9,7 +9,8 @@ The game Othello implemented in Rust using macroquad.
 - [x] Basic board and piece drawing.
 - [x] Game Logic and move calculation.
 - [x] Ui.
-- [ ] Win condition checking and menu screens.
+- [x] Win condition checking. ( ignore the broken dummy winner screen :P )
+- [ ] Menu screens.
 
 ## Images
 ![Demo](./screenshots/demo.png)
