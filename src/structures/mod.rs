@@ -11,7 +11,7 @@ pub struct LabelOptions {
 
 pub enum State {
     Playing,
-    Win(Cell),
+    Win,
 }
 
 pub struct UI {

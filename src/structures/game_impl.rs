@@ -41,10 +41,10 @@ impl Game {
             .flatten()
             .any(|cell| matches!(cell, Cell::Empty))
         {
-            self.state = State::Win(self.get_winner());
+            self.state = State::Win;
         } else if self.valid_moves.is_empty() {
             if self.skipped {
-                self.state = State::Win(self.get_winner());
+                self.state = State::Win;
             } else {
                 self.skipped = true;
                 self.turn = !self.turn;

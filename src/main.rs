@@ -23,7 +23,7 @@ async fn main() {
                 game.mouse_handling();
                 ui.show_game_ui(&mut game);
             }
-            State::Win(c) => ui.show_win_ui(&mut game),
+            State::Win => ui.show_win_ui(&mut game),
         }
 
         next_frame().await;
